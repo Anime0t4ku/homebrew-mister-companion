@@ -1,0 +1,114 @@
+name: Update Cask From Upstream Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply_mode:
+        description: "How to apply the cask update"
+        required: true
+        type: choice
+        default: pr
+        options:
+          - pr
+          - direct
+      release_tag:
+        description: "Optional explicit upstream release tag (for example: v1.2.3)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-cask:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+
+      - name: Resolve release tag
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${INPUT_RELEASE_TAG}" ]]; then
+            tag="${INPUT_RELEASE_TAG}"
+          else
+            api_url="https://api.github.com/repos/Anime0t4ku/mister-companion/releases/latest"
+            tag=$(curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "$api_url" | python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])')
+          fi
+
+          if [[ -z "${tag}" ]]; then
+            echo "Unable to resolve release tag."
+            exit 1
+          fi
+
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Update cask version
+        id: update
+        env:
+          NEW_TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          file="Casks/mister-companion.rb"
+          current=$(sed -n 's/^  version "\(.*\)"$/\1/p' "$file" | head -n1)
+
+          if [[ -z "$current" ]]; then
+            echo "Could not read current cask version from $file"
+            exit 1
+          fi
+
+          if [[ "$current" == "$NEW_TAG" ]]; then
+            echo "No change needed. Already at $NEW_TAG"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          sed -i "s/^  version \".*\"$/  version \"${NEW_TAG}\"/" "$file"
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit direct to default branch
+        if: steps.update.outputs.changed == 'true' && github.event.inputs.apply_mode == 'direct'
+        env:
+          NEW_TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add Casks/mister-companion.rb
+          git commit -m "chore(cask): update mister-companion to ${NEW_TAG}"
+          git push
+
+      - name: Create pull request
+        if: steps.update.outputs.changed == 'true' && github.event.inputs.apply_mode == 'pr'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ github.token }}
+          commit-message: chore(cask): update mister-companion to ${{ steps.resolve.outputs.tag }}
+          title: chore(cask): update mister-companion to ${{ steps.resolve.outputs.tag }}
+          body: |
+            Updates Homebrew cask version based on upstream release tag.
+
+            - Source repo: Anime0t4ku/mister-companion
+            - Upstream tag: `${{ steps.resolve.outputs.tag }}`
+          branch: chore/update-mister-companion-${{ steps.resolve.outputs.tag }}
+          delete-branch: true
+          labels: |
+            release
+
+      - name: No-op summary
+        if: steps.update.outputs.changed != 'true'
+        run: echo "No cask changes were needed."
