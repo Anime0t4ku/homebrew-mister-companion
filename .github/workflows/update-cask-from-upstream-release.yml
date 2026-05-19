@@ -97,8 +97,8 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ github.token }}
-          commit-message: chore(cask): update mister-companion to ${{ steps.resolve.outputs.tag }}
-          title: chore(cask): update mister-companion to ${{ steps.resolve.outputs.tag }}
+          commit-message: "chore(cask): update mister-companion to ${{ steps.resolve.outputs.tag }}"
+          title: "chore(cask): update mister-companion to ${{ steps.resolve.outputs.tag }}"
           body: |
             Updates Homebrew cask version based on upstream release tag.
 
