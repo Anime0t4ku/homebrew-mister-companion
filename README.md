@@ -53,6 +53,19 @@ To get the latest version:
 brew upgrade --cask mister-companion
 ```
 
+To get the latest unstable nightly later:
+
+```bash
+brew update 
+brew upgrade --cask --greedy mister-companion-unstable-nightly
+```
+
+Optional force refresh:
+
+```bash
+brew reinstall --cask mister-companion-unstable-nightly
+```
+
 ### Maintainer Release Process
 
 This tap includes a manual workflow at `.github/workflows/update-cask-from-upstream-release.yml`.

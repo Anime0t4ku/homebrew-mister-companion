@@ -95,3 +95,16 @@ Keep `apply_mode: direct` for urgent situations where speed is more important th
 brew tap Anime0t4ku/homebrew-mister-companion
 brew reinstall --cask mister-companion
 ```
+
+7. Validate nightly update behavior locally if needed:
+
+```bash
+brew update
+brew upgrade --cask --greedy mister-companion-unstable-nightly
+```
+
+Optional forced refresh:
+
+```bash
+brew reinstall --cask mister-companion-unstable-nightly
+```
