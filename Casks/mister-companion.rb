@@ -34,11 +34,10 @@ cask "mister-companion" do
                   venv/bin/pip install -r "$REQUIREMENTS"
                 fi
 
-                # CLI wrapper
+                # CLI wrapper — delegates to the app bundle so macOS associates the correct icon
                 cat > "#{staged_path}/mister-companion-wrapper" << 'EOF'
         #!/bin/bash
-              SOURCE_DIR="$(find "#{staged_path}" -mindepth 1 -maxdepth 1 -type d -name 'mister-companion-*' | head -n1)"
-              exec "#{staged_path}/venv/bin/python" "$SOURCE_DIR/mister-companion/main.py" "$@"
+        exec open -a "/Applications/MiSTer Companion.app" --args "$@"
         EOF
                 chmod 0755 "#{staged_path}/mister-companion-wrapper"
 
