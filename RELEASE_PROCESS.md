@@ -11,8 +11,9 @@ Workflow file:
 When you run the workflow, it:
 
 1. Resolves the upstream tag (latest release, or a tag you provide).
-2. Updates `Casks/mister-companion.rb` `version` to that tag.
-3. Applies the change either by pull request or direct commit.
+2. Computes SHA256 for `https://github.com/Anime0t4ku/mister-companion/archive/refs/tags/<tag>.tar.gz`.
+3. Updates `Casks/mister-companion.rb` `version` and `sha256`.
+4. Applies the change either by pull request or direct commit.
 
 ## Choices
 
@@ -23,12 +24,12 @@ How it works:
 1. Run the workflow manually from GitHub Actions.
 2. Set `apply_mode` to `pr`.
 3. Leave `release_tag` empty to use latest release, or set it explicitly.
-4. Workflow creates/updates a PR with the cask version bump.
+4. Workflow creates/updates a PR with the cask version and checksum bump.
 
 Pros:
 
 - Safer: review before merge.
-- Better audit trail for release changes.
+- Better audit trail for release and checksum changes.
 - Easier rollback if something is wrong.
 - Aligns with common tap maintenance practices.
 
@@ -93,4 +94,17 @@ Keep `apply_mode: direct` for urgent situations where speed is more important th
 ```bash
 brew tap Anime0t4ku/homebrew-mister-companion
 brew reinstall --cask mister-companion
+```
+
+7. Validate nightly update behavior locally if needed:
+
+```bash
+brew update
+brew upgrade --cask --greedy mister-companion-unstable-nightly
+```
+
+Optional forced refresh:
+
+```bash
+brew reinstall --cask mister-companion-unstable-nightly
 ```

@@ -25,24 +25,45 @@ brew install --cask mister-companion
 - A native **MiSTer Companion.app** in your `/Applications` folder
 - The `mister-companion` command-line tool
 
+The stable cask is pinned to immutable GitHub release tarballs with SHA256 verification.
+
+### macOS (Unstable Nightly)
+
+```bash
+brew tap Anime0t4ku/homebrew-mister-companion
+brew install --cask mister-companion-unstable-nightly
+```
+
+The nightly cask tracks the upstream `main` branch and may change at any time.
+
 **Launch it from:**
 
 - **Spotlight** — Press `⌘ + Space` and type **MiSTer Companion**
 - **Applications folder** — Open `/Applications/MiSTer Companion.app`
 - **Terminal** — Just type `mister-companion`
 
-### Linux (via Homebrew)
+### Linux
 
-```bash
-brew tap Anime0t4ku/homebrew-mister-companion
-brew install mister-companion
-```
+This tap currently provides macOS casks. For Linux installs, use upstream release artifacts from `Anime0t4ku/mister-companion`.
 
 ### Updating
 To get the latest version:
 
 ```bash
-brew upgrade mister-companion
+brew upgrade --cask mister-companion
+```
+
+To get the latest unstable nightly later:
+
+```bash
+brew update 
+brew upgrade --cask --greedy mister-companion-unstable-nightly
+```
+
+Optional force refresh:
+
+```bash
+brew reinstall --cask mister-companion-unstable-nightly
 ```
 
 ### Maintainer Release Process
@@ -53,14 +74,14 @@ Detailed guide (choices, pros/cons, and runbook): [RELEASE_PROCESS.md](./RELEASE
 
 Run it from GitHub Actions with **Run workflow** and choose:
 
-- `apply_mode: pr` (recommended) to open or update a pull request with the cask version bump.
+- `apply_mode: pr` (recommended) to open or update a pull request with the cask version and checksum bump.
 - `apply_mode: direct` to commit directly to the default branch.
 
 Optional input:
 
 - `release_tag` to force a specific tag (for example `v1.4.0`).
 
-If `release_tag` is empty, the workflow reads the latest release from `Anime0t4ku/mister-companion` and updates `Casks/mister-companion.rb`.
+If `release_tag` is empty, the workflow reads the latest release from `Anime0t4ku/mister-companion` and updates both `version` and `sha256` in `Casks/mister-companion.rb`.
 
 ### Uninstalling 
 
