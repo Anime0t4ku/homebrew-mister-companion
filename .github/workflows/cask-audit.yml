@@ -1,0 +1,58 @@
+name: Cask Audit
+
+on:
+  pull_request:
+    paths:
+      - 'Casks/*.rb'
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Casks/*.rb'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit casks
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Cache Homebrew Gems
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: |
+            ${{ runner.os }}-rubygems-
+
+      - name: Install Homebrew Gems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems --groups=all
+
+      - name: Tap this repository
+        run: brew tap --force ${{ github.repository }} "$GITHUB_WORKSPACE"
+
+      - name: Discover casks
+        id: casks
+        run: |
+          casks=$(find Casks -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')
+          echo "casks=$casks" >> "$GITHUB_OUTPUT"
+          echo "Casks to audit: $casks"
+
+      - name: Run brew style
+        run: brew style --casks ${{ steps.casks.outputs.casks }}
+
+      - name: Run brew audit
+        if: always()
+        run: brew audit --casks --strict --online ${{ steps.casks.outputs.casks }}
