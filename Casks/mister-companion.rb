@@ -89,6 +89,7 @@ cask "mister-companion" do
     print_stderr: true,
   }
   binary "#{staged_path}/mister-companion-wrapper", target: "mister-companion"
+  app "MiSTer Companion.app"
 
   zap trash: [
     "~/Library/Application Support/mister-companion",
