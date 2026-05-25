@@ -69,9 +69,14 @@ cask "mister-companion" do
             <key>CFBundleExecutable</key><string>mister-companion</string>
             <key>CFBundlePackageType</key><string>APPL</string>
             <key>CFBundleShortVersionString</key><string>#{version.to_s.sub(/^v/, "")}</string>
+            <key>CFBundleVersion</key><string>#{version.to_s.sub(/^v/, "")}</string>
+            <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+            <key>CFBundleDevelopmentRegion</key><string>en</string>
+            <key>NSPrincipalClass</key><string>NSApplication</string>
             <key>LSMinimumSystemVersion</key><string>13.0</string>
             <key>NSHighResolutionCapable</key><true/>
             <key>CFBundleIconFile</key><string>app.icns</string>
+            <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
         </dict>
         </plist>
         EOF
@@ -88,8 +93,17 @@ cask "mister-companion" do
     print_stderr: true,
   }
   binary "#{staged_path}/mister-companion-wrapper", target: "mister-companion"
-  artifact "#{staged_path}/MiSTer Companion.app",
-           target: "/Applications/MiSTer Companion.app"
+
+  # Use the `app` stanza (not `artifact`) so the generated bundle is properly
+  # registered with LaunchServices. This is required for the app to appear
+  # in Spotlight, Launchpad, "Open With" menus, etc. The `artifact` stanza
+  # bypasses the registration steps that `app` performs automatically.
+  app "MiSTer Companion.app"
+
+  postflight do
+    system_command "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+                   args: ["-f", appdir/"MiSTer Companion.app"]
+  end
 
   zap trash: [
     "~/Library/Application Support/mister-companion",
