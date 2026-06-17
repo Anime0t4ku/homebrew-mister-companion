@@ -1,6 +1,6 @@
 cask "mister-companion" do
-  version "v4.6.0"
-  sha256 "4e9a15523ce3a062bc4c97051ffbca3f59bf193b93b359a3ec7209044eeccf5c"
+  version "v4.7.0"
+  sha256 "d3c9a3f3b89a0cb8c95bb5df38c6b4c26ca7f6fd7c311e2f096becdffe652583"
 
   url "https://github.com/Anime0t4ku/mister-companion/archive/refs/tags/#{version}.tar.gz"
   name "MiSTer Companion"
