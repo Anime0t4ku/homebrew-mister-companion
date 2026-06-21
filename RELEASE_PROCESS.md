@@ -2,9 +2,21 @@
 
 This repository supports a **manual** release workflow to update the Homebrew cask version from upstream releases in `Anime0t4ku/mister-companion`.
 
-Workflow file:
+Workflow files:
 
-- `.github/workflows/update-cask-from-upstream-release.yml`
+- `.github/workflows/update-cask-from-upstream-release.yml` (manual version bumps)
+- `.github/workflows/cask-audit.yml` (automatic PR validation)
+
+## PR Checks
+
+All pull requests that modify `Casks/*.rb` run the **Cask Audit** workflow. It performs:
+
+- `brew style --casks` (Homebrew Ruby style / RuboCop rules)
+- `brew audit --casks --strict --online` (full cask linting, metadata, URLs, etc.)
+
+The job must pass before the PR can be merged (configure as a required status check in repository branch protection rules for the `main` branch).
+
+This prevents regressions in Homebrew compatibility, style violations, and common cask mistakes.
 
 ## Goal
 
